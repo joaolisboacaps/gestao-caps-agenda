@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Gestão CAPS</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f3f7f7;--card:#fff;--text:#18302f;--muted:#687a78;--brand:#0f766e;--brand2:#115e59;--brand3:#dff4f0;--line:#d8e6e3;--shadow:0 6px 20px rgba(19,59,56,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:76px}
+header{background:linear-gradient(145deg,#0b5f59,#12877d);color:#fff;padding:22px 16px 20px;position:sticky;top:0;z-index:20;box-shadow:0 4px 18px #0002}header .brandline{display:flex;align-items:center;gap:10px}header .brandicon{font-size:28px}h1{font-size:23px;line-height:1.1;margin:0 0 4px}header p{margin:0;opacity:.9;font-size:13px}
+main{padding:14px;max-width:980px;margin:auto}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:13px;box-shadow:var(--shadow)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{padding:14px;border-radius:15px;background:linear-gradient(180deg,#f3fbf9,#e8f5f2);border:1px solid #d7ebe7}.metric b{display:block;font-size:25px;line-height:1.05;color:var(--brand2)}.metric span{font-size:12px;color:var(--muted);display:block;margin-top:5px}.metric small{font-size:11px;color:var(--muted)}
+.summary-hero{background:linear-gradient(145deg,#0e746c,#159187);color:#fff;border:0;box-shadow:0 8px 24px rgba(15,118,110,.22)}.summary-hero h2,.summary-hero .muted{color:#fff}.summary-hero .muted{opacity:.9}.summary-strip{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.summary-chip{background:#ffffff1c;border:1px solid #ffffff33;border-radius:13px;padding:10px}.summary-chip b{font-size:19px;display:block}.summary-chip span{font-size:11px;opacity:.9}
+button,.filelabel{border:0;border-radius:13px;padding:12px 14px;background:var(--brand);color:#fff;font-weight:750;cursor:pointer;display:inline-block;text-align:center;transition:.18s}.secondary{background:#e7f1ef;color:var(--brand2)}button:active,.filelabel:active{transform:scale(.98)}input[type=file]{display:none}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:6px 2px 11px;position:sticky;top:73px;background:var(--bg);z-index:15;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tabs button{white-space:nowrap;font-size:12px;padding:10px 13px;background:#dfecea;color:#27514e;border:1px solid #d0e1de}.tabs button.active{background:var(--brand2);color:#fff;border-color:var(--brand2);box-shadow:0 4px 10px #115e5930}.tabs button.active::before{content:'✓ ';font-weight:900}
+h2{font-size:17px;margin:4px 0 11px}h3{font-size:14px;margin:16px 0 8px}.muted{color:var(--muted);font-size:13px;line-height:1.45}
+.chartbox{height:250px}.chartbox.tall{height:290px}.chart-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.badge{display:inline-flex;align-items:center;background:var(--brand3);color:var(--brand2);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:750;white-space:nowrap}.insight{border-left:4px solid var(--brand);background:#f1f8f6;padding:12px 13px;border-radius:0 12px 12px 0;margin:8px 0;font-size:13px;line-height:1.5}.day-picker{width:100%;padding:14px;border:2px solid #cfe2df;border-radius:14px;background:#fff;color:var(--text);font-size:17px;font-weight:750;outline:none}.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px}.calendar-head button{padding:9px 12px}.calendar-title{font-weight:850;font-size:16px}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}.cal-wd{font-size:10px;text-align:center;color:var(--muted);font-weight:800;padding:4px 0}.cal-day{min-height:42px;border:1px solid #d9e8e5;background:#f8fbfa;color:#355a56;border-radius:11px;font-weight:750}.cal-day.empty{visibility:hidden}.cal-day.available{background:#e6f5f1;color:var(--brand2);border-color:#c7e4de}.cal-day.selected{background:var(--brand2);color:#fff;border-color:var(--brand2);box-shadow:0 3px 8px #115e5930}.cal-day.disabled{opacity:.35}.selected-day-title{margin-top:12px;padding:10px 12px;background:#eef8f6;border-radius:12px;color:var(--brand2);font-weight:800}.day-picker:focus{border-color:var(--brand);box-shadow:0 0 0 3px #0f766e18}.daychips{display:flex;gap:7px;overflow:auto;padding:8px 0 2px}.daychip{background:#edf5f3;color:var(--brand2);border:1px solid #d4e6e2;padding:8px 11px;border-radius:999px;font-size:12px;font-weight:750;white-space:nowrap}.daychip.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:13px}table{border-collapse:collapse;width:100%;font-size:12px;background:#fff}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{background:#eef5f4;position:sticky;top:0}tbody tr:last-child td{border-bottom:0}
+.alert{padding:12px;border-radius:12px;background:#fff7df;color:#714d00;font-size:13px}.hidden{display:none!important}.section-title{display:flex;justify-content:space-between;align-items:center;gap:8px}.empty{padding:18px;text-align:center;color:var(--muted)}
+footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:9px 14px;text-align:center;font-size:11px;color:var(--muted);z-index:25}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}.formgrid label{font-size:12px;font-weight:750;color:var(--muted)}.formgrid input,.formgrid select{display:block;width:100%;margin-top:5px;padding:12px;border:1px solid #cfe2df;border-radius:11px;background:#fff;color:var(--text);font:inherit}.appointment-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.appointment-row:last-child{border-bottom:0}.appointment-main{display:flex;align-items:center;gap:10px;min-width:0}.appointment-time{font-weight:850;color:var(--brand2);min-width:46px}.status-control{position:relative;display:flex;align-items:center;justify-content:flex-end}.attendance{padding:8px 10px;border-radius:999px;font-size:11px;white-space:nowrap}.status-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:40;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(19,59,56,.16);padding:6px;min-width:130px}.status-menu button{display:block;width:100%;margin:2px 0;padding:9px 10px;text-align:left;font-size:12px}.status-menu .confirm{background:#e5f5ea;color:#17633a}.status-menu .miss{background:#fde8e8;color:#9a2d2d}.form-actions{display:flex;gap:8px;margin-top:14px;padding-bottom:14px}.form-actions button{flex:1}.status-ok{background:#e5f5ea;color:#17633a}.status-no{background:#fde8e8;color:#9a2d2d}.status-pending{background:#eef2f1;color:#526360}@media(max-width:520px){.formgrid{grid-template-columns:1fr}.appointment-row{align-items:flex-start}.attendance{font-size:10px;padding:7px 8px}}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}main{padding:20px}.chartbox{height:300px}.summary-strip{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="brandline"><span class="brandicon">🏥</span><div><h1>Gestão CAPS</h1><p>Painel mensal de Psicologia e Psiquiatria</p></div></div></header>
+<main>
+<div class="card">
+<h2>Carregar agenda do mês</h2>
+<p class="muted">No celular, toque abaixo e escolha o Excel da agenda. O processamento é feito no próprio aparelho.</p>
+<label class="filelabel" for="file">📄 Escolher Excel</label>
+<input id="file" type="file" accept=".xlsx,.xls">
+<button class="secondary" id="install" style="display:none;margin-left:6px">➕ Instalar</button>
+<p id="status" class="muted"></p><div id="dateCheck" class="muted" style="font-size:12px;margin-top:6px"></div>
+</div>
+
+<div id="app" class="hidden">
+<div class="tabs">
+<button data-page="resumo" onclick="show('resumo')">📊 Resumo</button><button data-page="dia" onclick="show('dia')">📅 Dia</button><button data-page="modal" onclick="show('modal')">👥 Modalidade</button><button data-page="hora" onclick="show('hora')">🕐 Hora</button><button data-page="prof" onclick="show('prof')">👩‍⚕️ Profissional</button><button data-page="rep" onclick="show('rep')">🔁 Repetidas</button><button data-page="origem" onclick="show('origem')">🚪 Origem</button><button data-page="cap" onclick="show('cap')">⚖️ Capacidade</button><button data-page="historico" onclick="show('historico')">📈 Histórico</button>
+</div>
+
+<div id="newAppointment" class="card hidden"><div class="section-title"><h2>➕ Novo atendimento</h2><button type="button" class="secondary" onclick="closeNewAppointment()">Fechar</button></div><p class="muted">Este cadastro fica somente no aplicativo e não altera a planilha original.</p><div class="formgrid"><label>Nome<input id="newName" type="text" autocomplete="off"></label><label>Data<input id="newDate" type="date"></label><label>Hora<input id="newTime" type="time"></label><label>Modalidade<select id="newModal"><option>Psicologia</option><option>Psiquiatria</option></select></label><label>Profissional<input id="newProf" type="text" autocomplete="off"></label><label>Rotina<select id="newRotina"><option>Primeira consulta</option><option>Retorno</option></select></label><label>Solicitante<input id="newSolic" type="text" autocomplete="off" placeholder="Deixe vazio para agendamento pessoal"></label></div><div class="form-actions"><button type="button" class="secondary" onclick="closeNewAppointment()">Cancelar</button><button type="button" onclick="submitNewAppointment()">✓ Concluir cadastro</button></div></div>
+<section id="resumo" class="page">
+<div class="card summary-hero"><h2>📊 Visão geral do mês</h2><p class="muted">Uma leitura rápida da agenda, da entrada de novos usuários e da distribuição entre Psicologia e Psiquiatria.</p><div class="summary-strip" id="summaryStrip"></div></div>
+<div class="grid" id="metrics"></div>
+<div class="card"><div class="chart-card-head"><div><h2>📅 Movimento por dia</h2><p class="muted">Volume diário, separado por modalidade. O pico diário é o principal ponto de atenção.</p></div><span class="badge" id="peakBadge">—</span></div><div class="chartbox tall"><canvas id="dailyChart"></canvas></div></div>
+<div class="card"><div class="chart-card-head"><div><h2>🆕 Entrada e indicação</h2><p class="muted">Compare primeira consulta/nova entrada com registros associados ao Jeremias.</p></div></div><div class="chartbox"><canvas id="entryChart"></canvas></div></div>
+<div class="grid">
+<div class="card"><h2>🩺 Psiquiatria × Psicologia</h2><div class="chartbox"><canvas id="modalChart"></canvas></div></div>
+<div class="card"><h2>🕘 Manhã × Tarde</h2><div class="chartbox"><canvas id="turnoChart"></canvas></div></div>
+</div>
+<div class="card"><div class="section-title"><h2>🔎 Leitura gerencial</h2><span class="badge">automática</span></div><div id="reading"></div></div>
+<div class="card"><h2>📌 Maiores volumes do mês</h2><div id="topDays"></div></div>
+</section>
+
+<section id="dia" class="page hidden">
+<div class="card"><h2>📅 Escolha o dia</h2><p class="muted">Toque no campo abaixo para abrir o calendário. O sistema mostra somente os dias que existem na planilha e mantém os horários exatamente como registrados.</p><input id="dayPicker" class="day-picker" type="date" aria-label="Data selecionada"><div class="calendar-head"><button class="secondary" id="prevMonth">‹</button><div class="calendar-title" id="calendarTitle">Calendário</div><button class="secondary" id="nextMonth">›</button></div><div class="calendar" id="calendar"></div><div class="selected-day-title" id="selectedDayTitle">Selecione um dia com agenda</div><div id="dayChips" class="daychips"></div><p id="dayHint" class="muted" style="margin-bottom:0">Os dias disponíveis vêm diretamente da coluna DATA do Excel.</p></div>
+<div id="dayDetail"></div>
+<div class="card"><h2>📅 Resumo de todos os dias</h2><div id="diaTable"></div></div>
+</section>
+<section id="modal" class="page hidden"><div class="card"><h2>👥 Dia por modalidade</h2><div id="modalTable"></div></div></section>
+<section id="hora" class="page hidden"><div class="card"><h2>🕐 Por Hora</h2><div id="horaTable"></div></div></section>
+<section id="prof" class="page hidden"><div class="card"><h2>👩‍⚕️ Por Profissional</h2><div id="profTable"></div></div></section>
+<section id="rep" class="page hidden"><div class="card"><h2>🔁 Pessoas Repetidas</h2><p class="muted">Todas as datas e modalidades. Repetição não é tratada automaticamente como duplicidade.</p><div id="repTable"></div></div></section>
+<section id="origem" class="page hidden"><div class="card"><h2>🚪 Origem / Solicitante</h2><div id="origemTable"></div></div></section>
+<section id="cap" class="page hidden"><div class="card"><h2>⚖️ Capacidade</h2><p class="muted">Cenários matemáticos da carga agendada. Não são, sozinhos, recomendação de número de profissionais.</p><div id="capTable"></div><div class="alert">Para dimensionamento real, incluir duração efetiva, faltas, encaixes, acolhimento, prontuário, grupos, reuniões, matriciamento e demais atividades.</div></div></section>
+<section id="historico" class="page hidden"><div class="card"><h2>📈 Histórico de presença</h2><p class="muted">Acompanhamento por dia da agenda carregada. “Pessoas” conta nomes únicos; “Agendas” conta atendimentos. O que ainda não foi marcado permanece como <b>Não informado</b>.</p><div id="historicoSummary" class="summary-strip"></div></div><div class="card"><div id="historicoTable"></div></div></section>
+</div>
+</main><footer>Regra local: solicitante vazio = agendamento pessoal • manhã até 12h • tarde até 16h30</footer>
+
+<script>
+let rows=[],baseRows=[],extraRows=[],attendance={},agendaStoreKey="",charts={},selectedDayKey="";
+const $=id=>document.getElementById(id);
+function norm(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function col(cols,names){for(const n of names){let c=cols.find(x=>norm(x)===norm(n));if(c)return c}for(const c of cols){if(names.some(n=>norm(c).includes(norm(n))))return c}return null}
+function pad2(n){return String(n).padStart(2,'0')}
+function isLeap(y){return y%4===0&&(y%100!==0||y%400===0)}
+function dim(y,m){return [31,isLeap(y)?29:28,31,30,31,30,31,31,30,31,30,31][m-1]||0}
+function validKey(y,m,d){
+  y=Number(y);m=Number(m);d=Number(d);
+  if(!Number.isInteger(y)||!Number.isInteger(m)||!Number.isInteger(d)||m<1||m>12||d<1||d>dim(y,m))return '';
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+function daysCivil(y,m,d){
+  y-=m<=2?1:0;
+  const era=Math.floor((y>=0?y:y-399)/400),yoe=y-era*400;
+  const mp=m+(m>2?-3:9),doy=Math.floor((153*mp+2)/5)+d-1;
+  const doe=yoe*365+Math.floor(yoe/4)-Math.floor(yoe/100)+doy;
+  return era*146097+doe-719468;
+}
+function civilDays(z){
+  z+=719468;
+  const era=Math.floor((z>=0?z:z-146096)/146097),doe=z-era*146097;
+  const yoe=Math.floor((doe-Math.floor(doe/1460)+Math.floor(doe/36524)-Math.floor(doe/146096))/365);
+  let y=yoe+era*400;
+  const doy=doe-(365*yoe+Math.floor(yoe/4)-Math.floor(yoe/100));
+  const mp=Math.floor((5*doy+2)/153),d=doy-Math.floor((153*mp+2)/5)+1;
+  const m=mp+(mp<10?3:-9); y+=m<=2?1:0;
+  return [y,m,d];
+}
+function serialToKey(v){
+  if(!Number.isFinite(Number(v))||Number(v)<1||Number(v)>=100000)return '';
+  const n=Math.floor(Number(v)), base=daysCivil(1899,12,31), adj=n-(n>=60?1:0);
+  const [y,m,d]=civilDays(base+adj);
+  return validKey(y,m,d);
+}
+function parseDateKey(v,cell){
+  const candidates=[];
+  if(cell&&cell.w!=null)candidates.push(String(cell.w).trim());
+  if(v!=null)candidates.push(v);
+  for(const item of candidates){
+    if(typeof item==='number'&&Number.isFinite(item)){const k=serialToKey(item);if(k)return k;continue}
+    if(item instanceof Date&&!isNaN(item.getTime())){
+      let k=validKey(item.getFullYear(),item.getMonth()+1,item.getDate());if(k)return k;
+      k=validKey(item.getUTCFullYear(),item.getUTCMonth()+1,item.getUTCDate());if(k)return k;
+      continue;
+    }
+    const s=String(item??'').trim(); if(!s)continue;
+    let m=s.match(/^(\d{4})[-\/\.](\d{1,2})[-\/\.](\d{1,2})/);
+    if(m){const k=validKey(+m[1],+m[2],+m[3]);if(k)return k}
+    m=s.match(/^(\d{1,2})[\/\.](\d{1,2})[\/\.](\d{4})/);
+    if(m){const k=validKey(+m[3],+m[2],+m[1]);if(k)return k}
+    m=s.match(/^(\d{1,2})-(\d{1,2})-(\d{2,4})/);
+    if(m){
+      const a=+m[1],b=+m[2],yy=+m[3],y=yy<100?2000+yy:yy,fmt=String(cell?.z??'').toLowerCase();
+      if(/m.*d/.test(fmt)){const k=validKey(y,a,b);if(k)return k}
+      if(/d.*m/.test(fmt)){const k=validKey(y,b,a);if(k)return k}
+      let k=validKey(y,a,b);if(k)return k;k=validKey(y,b,a);if(k)return k;
+    }
+    if(/^\d+(?:\.\d+)?$/.test(s)){const k=serialToKey(Number(s));if(k)return k}
+  }
+  return '';
+}
+function dateKey(d){
+  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d.trim()))return d.trim();
+  return parseDateKey(d,null);
+}
+function dateBR(d){
+  const m=String(d??'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?`${m[3]}/${m[2]}/${m[1]}`:'Data inválida';
+}
+function keyParts(k){
+  const m=String(k||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?{y:+m[1],m:+m[2],d:+m[3]}:null;
+}
+function weekday(k){
+  const p=keyParts(k);if(!p)return 0;
+  return ((daysCivil(p.y,p.m,p.d)+4)%7+7)%7;
+}
+function shiftMonth(y,m,n){
+  const z=y*12+(m-1)+n, yy=Math.floor(z/12);
+  return {y:yy,m:z-yy*12+1};
+}
+function parseHour(v){if(typeof v==='number'&&v>=0&&v<1){let mins=Math.round(v*1440);return mins}let s=String(v??'');let m=s.match(/(\d{1,2})[:h](\d{2})/i);return m?+m[1]*60+ +m[2]:NaN}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function table(data, headers){if(!data.length)return '<p class="muted">Sem registros.</p>';return '<div class="tablewrap"><table><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+headers.map(h=>'<td>'+esc(r[h])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+function groupBy(arr,key){let m={};arr.forEach(r=>{const k=typeof key==='function'?key(r):r[key];(m[k]??=[]).push(r)});return m}
+function storageGet(key){try{return JSON.parse(localStorage.getItem(key)||'null')}catch(e){return null}}
+function storageSet(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(e){console.warn('Armazenamento local indisponível',e);return false}}
+function simpleHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16)}
+function makeAgendaKey(a){return 'caps_agenda_v1_'+simpleHash(a.map(r=>[r.dataKey,r.hora,r.nome,r.tipo,r.prof,r.rotina,r.solic].join('|')).sort().join('§'))}
+function rowId(r,i){return r.id||simpleHash([r.dataKey,r.hora,r.nome,r.modal,r.prof,i].join('|'))}
+function statusLabel(v){return v==='compareceu'?'🟢 Confirmado':v==='nao_compareceu'?'🔴 Faltou':'⚪ Não informado'}
+function statusClass(v){return v==='compareceu'?'status-ok':v==='nao_compareceu'?'status-no':'status-pending'}
+function toggleStatusMenu(id){document.querySelectorAll('.status-menu').forEach(x=>x.classList.add('hidden'));const el=$('status-menu-'+id);if(el)el.classList.toggle('hidden')}
+function setAttendance(id,value){attendance[id]=value;saveAppData();const k=selectedDayKey||currentDay();renderDayDetail(k);requestAnimationFrame(()=>window.scrollTo(0,window.scrollY))}
+document.addEventListener('click',e=>{if(!e.target.closest('.status-control'))document.querySelectorAll('.status-menu').forEach(x=>x.classList.add('hidden'))});
+function saveAppData(){
+ if(!agendaStoreKey)return false;
+ return storageSet(agendaStoreKey,{extras:extraRows.map(r=>({...r, id:r.id})),attendance});
+}
+function loadAppData(){
+ const d=storageGet(agendaStoreKey)||{};extraRows=Array.isArray(d.extras)?d.extras.map(r=>classify({...r})):[];attendance=d.attendance&&typeof d.attendance==='object'?d.attendance:{};
+ rows=baseRows.concat(extraRows);rows.forEach((r,i)=>{if(!r.id)r.id=rowId(r,i)});
+ return !!d.extras || Object.keys(attendance).length>0;
+}
+function refreshRows(){rows=baseRows.concat(extraRows);rows.forEach((r,i)=>{if(!r.id)r.id=rowId(r,i)});saveAppData();render()}
+function addExtraAppointment(data){
+ const r=classify({id:'extra_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),nome:data.nome.trim(),dataKey:data.data,hora:data.hora,tipo:data.modal,prof:data.prof.trim(),rotina:data.rotina,solic:data.solic.trim(),min:parseHour(data.hora),extra:true});
+ extraRows.push(r);refreshRows();selectDay(r.dataKey,[...new Set(rows.map(x=>x.dataKey))].sort());
+}
+function cycleAttendance(id){toggleStatusMenu(id)}
+function currentDay(){return selectedDayKey||$('dayPicker').value||[...new Set(rows.map(r=>r.dataKey))].sort()[0]||''}
+function openNewAppointment(){
+ const d=currentDay();
+ $('newDate').value=d;$('newName').value='';$('newTime').value='';$('newModal').value='Psicologia';$('newProf').value='';$('newRotina').value='Primeira consulta';$('newSolic').value='';
+ $('newAppointment').classList.remove('hidden');$('newName').focus();
+}
+function closeNewAppointment(){$('newAppointment').classList.add('hidden')}
+function classify(r){
+ const tipo=norm(r.tipo); r.modal=tipo.includes('psiquiat')?'Psiquiatria':tipo.includes('psicolog')?'Psicologia':r.tipo;
+ const rot=norm(r.rotina); r.first=/primeira|primeiro|1 consulta/.test(rot);
+ r.solic=String(r.solic??'').trim(); r.origem=!r.solic?'Agendamento pessoal':norm(r.solic).includes('jeremias')?'Jeremias':'Outro solicitante';
+ r.turno=Number.isFinite(r.min)&&r.min<=720?'Manhã':(Number.isFinite(r.min)&&r.min<=990?'Tarde':'Fora da janela');
+ return r
+}
+$('file').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;
+ $('status').textContent='Lendo a planilha…';
+ const reader=new FileReader();
+ reader.onerror=()=>{$('status').textContent='Não foi possível ler o arquivo selecionado.'};
+ reader.onload=ev=>{
+  try{
+   // Mantemos a leitura que funcionava no V7 para não quebrar arquivos vindos do Google Drive.
+   const wb=XLSX.read(ev.target.result,{type:'array',cellDates:false,cellNF:true,cellText:true,UTC:false,dateNF:'yyyy-mm-dd'});
+   const sheetName=wb.SheetNames.includes('Agenda')?'Agenda':wb.SheetNames[0];
+   const ws=wb.Sheets[sheetName];
+   if(!ws)throw Error('Não encontrei uma aba de agenda no arquivo.');
+   const raw=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+   const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true});
+   if(!raw.length || !matrix.length)throw Error('A aba de agenda está vazia.');
+   const cols=Object.keys(raw[0]);
+   const c={nome:col(cols,['NOME','PACIENTE','PESSOA']),data:col(cols,['DATA']),hora:col(cols,['HORA','HORARIO']),tipo:col(cols,['TIPO DE AGENDA','TIPO AGENDA','MODALIDADE']),prof:col(cols,['NOME DO PROFISSIONAL','PROFISSIONAL']),rot:col(cols,['ROTINA DE CONSULTA','ROTINA']),solic:col(cols,['SOLICITANTE'])};
+   const miss=['nome','data','hora','tipo','prof'].filter(k=>!c[k]);if(miss.length)throw Error('Faltam colunas obrigatórias: '+miss.join(', '));
+   const header=matrix[0].map(v=>String(v??'').trim());
+   const dataIdx=header.findIndex(h=>norm(h)===norm(c.data));
+   if(dataIdx<0)throw Error('Não encontrei a coluna DATA.');
+   rows=[];
+   for(let i=0;i<raw.length;i++){
+     const x=raw[i], row=matrix[i+1]||[];
+     const addr=XLSX.utils.encode_cell({r:i+1,c:dataIdx});
+     const cell=ws[addr];
+     let dk=parseDateKey(cell?.v,cell);
+     if(!dk && cell?.w) dk=parseDateKey(cell.w,null);
+     if(!dk) dk=parseDateKey(x[c.data],cell);
+     if(!dk) dk=parseDateKey(row[dataIdx],cell);
+     if(!dk) continue;
+     rows.push(classify({nome:String(x[c.nome]??'').trim(),dataKey:dk,hora:x[c.hora],tipo:String(x[c.tipo]??''),prof:String(x[c.prof]??''),rotina:c.rot?String(x[c.rot]??''):'',solic:c.solic?String(x[c.solic]??''):'',min:parseHour(x[c.hora])}));
+   }
+   rows=rows.filter(r=>r.nome && /^\d{4}-\d{2}-\d{2}$/.test(r.dataKey));
+   if(!rows.length)throw Error('Não encontrei datas válidas na coluna DATA.');
+   baseRows=rows.map((r,i)=>({...r,id:'base_'+rowId(r,i)}));
+   agendaStoreKey=makeAgendaKey(baseRows);
+   loadAppData();
+   const found=[...new Set(rows.map(r=>r.dataKey))].sort();
+   render();$('app').classList.remove('hidden');show('resumo');$('status').textContent=`${rows.length} registros processados • ${found.length} dias encontrados • ${found[0] ? dateBR(found[0]) : 'sem datas'}.`; $('dateCheck').innerHTML=`<b>Data:</b> leitura OK • ${found.length} dias válidos • ${Object.keys(attendance).length||extraRows.length ? 'Dados do aplicativo recuperados.' : 'Sem registros adicionais salvos.'}`;
+  }catch(err){$('status').textContent='Erro ao ler a planilha: '+err.message;console.error(err)}
+ };reader.readAsArrayBuffer(f)
+});
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'})}
+function destroyCharts(){Object.values(charts).forEach(c=>c?.destroy());charts={}}
+let calendarMonth=null;
+function renderCalendar(available, selected){
+ const av=new Set(available);
+ const p=keyParts(String(selected||''))||keyParts(String(available[0]||''));
+ const base=calendarMonth||p||{y:2026,m:1,d:1};
+ const y=base.y,m=base.m;calendarMonth={y,m,d:1};
+ const names=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+ $('calendarTitle').textContent=`${names[m-1]} de ${y}`;
+ const offset=weekday(validKey(y,m,1)),total=dim(y,m);
+ let html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(x=>`<div class="cal-wd">${x}</div>`).join('');
+ for(let i=0;i<offset;i++)html+='<button class="cal-day empty" tabindex="-1"></button>';
+ for(let d=1;d<=total;d++){
+  const k=validKey(y,m,d),ok=av.has(k),sel=k===selected;
+  html+=`<button type="button" class="cal-day ${ok?'available':'disabled'} ${sel?'selected':''}" data-day="${k}" ${ok?'':'disabled'}>${d}</button>`;
+ }
+ $('calendar').innerHTML=html;
+ $('calendar').querySelectorAll('.cal-day.available').forEach(b=>b.onclick=()=>selectDay(b.dataset.day,available));
+}
+function selectDay(k,available){
+ if(!available.includes(k))return;
+ selectedDayKey=k;
+ $('dayPicker').value=k;
+ document.querySelectorAll('.daychip').forEach(b=>b.classList.toggle('active',b.dataset.day===k));
+ $('selectedDayTitle').textContent='Dia selecionado: '+dateBR(k);
+ const days=groupBy(rows,r=>r.dataKey);
+ $('dayHint').textContent=`${days[k]?.length||0} agenda(s) registrada(s) neste dia.`;
+ renderDayDetail(k);
+ const p=keyParts(k);if(p)calendarMonth={y:p.y,m:p.m,d:1};
+ renderCalendar(available,k);
+}
+function renderDayDetail(k){
+ const days=groupBy(rows,r=>r.dataKey);
+ const a=(days[k]||[]).slice().sort((x,y)=>(x.min??9999)-(y.min??9999));
+ const psic=a.filter(r=>r.modal==='Psicologia'), psiq=a.filter(r=>r.modal==='Psiquiatria');
+ const jer=a.filter(r=>r.origem==='Jeremias'), first=a.filter(r=>r.first);
+ const pessoas=new Set(a.map(r=>r.nome)).size;
+ const turnoM=a.filter(r=>r.turno==='Manhã').length, turnoT=a.filter(r=>r.turno==='Tarde').length;
+ const compareceu=a.filter(r=>attendance[r.id]==='compareceu').length, nao=a.filter(r=>attendance[r.id]==='nao_compareceu').length, pend=a.length-compareceu-nao;
+ const resumo=`<div class="card"><h2>📌 ${dateBR(k)}</h2><div class="grid">
+  <div class="metric"><b>${a.length}</b><span>Agendas do dia</span></div><div class="metric"><b>${pessoas}</b><span>Pessoas</span></div>
+  <div class="metric"><b>${psiq.length}</b><span>Psiquiatria</span></div><div class="metric"><b>${psic.length}</b><span>Psicologia</span></div>
+  <div class="metric"><b>${first.length}</b><span>Primeira vez</span></div><div class="metric"><b>${jer.length}</b><span>Indicação Jeremias</span></div>
+  <div class="metric"><b>${turnoM}</b><span>Manhã</span></div><div class="metric"><b>${turnoT}</b><span>Tarde</span></div></div></div>`;
+ const pres=`<div class="card"><h2>📍 Comparecimento</h2><div class="grid"><div class="metric"><b>${compareceu}</b><span>Confirmados</span></div><div class="metric"><b>${nao}</b><span>Faltaram</span></div><div class="metric"><b>${pend}</b><span>Não informado</span></div><div class="metric"><b>${extraRows.filter(r=>r.dataKey===k).length}</b><span>Incluídos no app</span></div></div><p class="muted" style="margin:10px 0 0">Toque em “Não informado” para escolher “Confirmado” ou “Faltou”. Se não tocar, permanece como “Não informado”. Essas marcações ficam salvas no aplicativo e não alteram o Excel.</p></div>`;
+ const destaques=`<div class="card"><h2>🔎 Destaques do dia</h2><p class="muted"><b>Primeira vez:</b> ${first.map(r=>esc(r.nome)).join(', ')||'Nenhuma registrada.'}</p><p class="muted"><b>Indicação do Jeremias:</b> ${jer.map(r=>esc(r.nome)).join(', ')||'Nenhuma registrada.'}</p></div>`;
+ const mk=a=>a.map(r=>({Hora:Number.isFinite(r.min)?String(Math.floor(r.min/60)).padStart(2,'0')+':'+String(r.min%60).padStart(2,'0'):'—',Nome:r.nome,'Primeira vez':r.first?'Sim':'Não',Indicação:r.origem,Profissional:r.prof}));
+ const actionRows=a.map(r=>({r,hor:Number.isFinite(r.min)?String(Math.floor(r.min/60)).padStart(2,'0')+':'+String(r.min%60).padStart(2,'0'):'—'}));
+ const appointmentList=actionRows.map(({r,hor})=>{const rid=esc(r.id);return `<div class="appointment-row"><div class="appointment-main"><div class="appointment-time">${esc(hor)}</div><div><b>${esc(r.nome)}</b><div class="muted">${esc(r.modal)} • ${esc(r.prof||'Profissional não informado')} ${r.extra?'<span class="badge">Incluído no app</span>':''}</div></div></div><div class="status-control"><button type="button" class="attendance ${statusClass(attendance[r.id]||'')}" onclick="toggleStatusMenu('${rid}')">${statusLabel(attendance[r.id]||'')}</button><div id="status-menu-${rid}" class="status-menu hidden"><button type="button" class="confirm" onclick="setAttendance('${rid}','compareceu')">✓ Confirmado</button><button type="button" class="miss" onclick="setAttendance('${rid}','nao_compareceu')">✕ Faltou</button></div></div></div>`}).join('');
+ $('dayDetail').innerHTML=resumo+pres+destaques+
+  `<div class="card"><div class="section-title"><h2>🗓️ Atendimentos do dia — ${a.length}</h2><button type="button" onclick="openNewAppointment()">＋ Novo atendimento</button></div><p class="muted">O cadastro abaixo é feito somente dentro do aplicativo.</p>${appointmentList||'<div class="empty">Nenhum atendimento neste dia.</div>'}</div>`+
+  `<div class="card"><h2>🩺 Psiquiatria — ${psiq.length}</h2>${table(mk(psiq),['Hora','Nome','Primeira vez','Indicação','Profissional'])}</div>`+
+  `<div class="card"><h2>🧠 Psicologia — ${psic.length}</h2>${table(mk(psic),['Hora','Nome','Primeira vez','Indicação','Profissional'])}</div>`;
+}
+function submitNewAppointment(){
+ const data={nome:$('newName').value,data:$('newDate').value,hora:$('newTime').value,modal:$('newModal').value,prof:$('newProf').value,rotina:$('newRotina').value,solic:$('newSolic').value};
+ if(!data.nome||!data.data||!data.hora||!data.prof){alert('Preencha nome, data, hora e profissional.');return;}
+ addExtraAppointment(data);closeNewAppointment();
+}
+function render(){
+ destroyCharts();
+ const pessoas=new Set(rows.map(r=>r.nome)).size, first=rows.filter(r=>r.first).length, jer=rows.filter(r=>r.origem==='Jeremias').length;
+ const psiqTotal=rows.filter(r=>r.modal==='Psiquiatria').length, psicTotal=rows.filter(r=>r.modal==='Psicologia').length; const pct=(n,d)=>d?Math.round(n/d*100):0; $('summaryStrip').innerHTML=[['Agendas',rows.length],['Pessoas',pessoas],['Psiquiatria',`${psiqTotal} (${pct(psiqTotal,rows.length)}%)`],['Psicologia',`${psicTotal} (${pct(psicTotal,rows.length)}%)`]].map(x=>`<div class="summary-chip"><b>${x[1]}</b><span>${x[0]}</span></div>`).join(''); $('metrics').innerHTML=[['🗓️ Dias com agenda',new Set(rows.map(r=>r.dataKey)).size],['🆕 Primeira vez',first],['🔵 Indicação Jeremias',jer],['🔁 Pessoas repetidas',new Set(rows.filter(r=>rows.filter(x=>x.nome===r.nome).length>1).map(r=>r.nome)).size]].map(x=>`<div class="metric"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+ const days=groupBy(rows,r=>r.dataKey), keys=Object.keys(days).sort(), vals=keys.map(k=>days[k].length);
+ const labels=keys.map(k=>k.slice(8,10)+'/'+k.slice(5,7));
+ charts.daily=new Chart($('dailyChart'),{type:'bar',data:{labels,datasets:[{label:'Psiquiatria',data:keys.map(k=>days[k].filter(r=>r.modal==='Psiquiatria').length),stack:'volume'},{label:'Psicologia',data:keys.map(k=>days[k].filter(r=>r.modal==='Psicologia').length),stack:'volume'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}});
+ charts.entry=new Chart($('entryChart'),{type:'bar',data:{labels,datasets:[{label:'1ª consulta',data:keys.map(k=>days[k].filter(r=>r.first).length)},{label:'Indicação Jeremias',data:keys.map(k=>days[k].filter(r=>r.origem==='Jeremias').length)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+ charts.modal=new Chart($('modalChart'),{type:'doughnut',data:{labels:['Psiquiatria','Psicologia'],datasets:[{data:[rows.filter(r=>r.modal==='Psiquiatria').length,rows.filter(r=>r.modal==='Psicologia').length]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+ const turns=['Manhã','Tarde','Fora da janela'];charts.turno=new Chart($('turnoChart'),{type:'doughnut',data:{labels:turns,datasets:[{data:turns.map(t=>rows.filter(r=>r.turno===t).length)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+ const pico=keys.length?keys.reduce((a,b)=>days[a].length>=days[b].length?a:b):null; $('peakBadge').textContent=pico?`Pico: ${pico.slice(8,10)}/${pico.slice(5,7)}/${pico.slice(0,4)} · ${days[pico].length}`:'Sem dados'; const top=keys.slice().sort((a,b)=>days[b].length-days[a].length).slice(0,3); $('topDays').innerHTML=top.length?table(top.map(k=>({Data:dateBR(k),Agendas:days[k].length,Psiquiatria:days[k].filter(r=>r.modal==='Psiquiatria').length,Psicologia:days[k].filter(r=>r.modal==='Psicologia').length,'1ª vez':days[k].filter(r=>r.first).length,Jeremias:days[k].filter(r=>r.origem==='Jeremias').length})),['Data','Agendas','Psiquiatria','Psicologia','1ª vez','Jeremias']):'<div class="empty">Sem dados.</div>';
+ $('reading').innerHTML=`<p>O principal indicador de pressão é o <b>pico diário</b>. ${pico?`O maior volume ocorreu em <b>${pico.slice(8,10)}/${pico.slice(5,7)}/${pico.slice(0,4)}</b>, com <b>${days[pico].length} agendas</b>.`:''}</p><p>Há <b>${first}</b> registros de primeira consulta/nova entrada e <b>${jer}</b> associados ao Jeremias. Registros sem solicitante são tratados como <b>agendamento pessoal</b>.</p><p>A manhã é considerada até <b>12h</b> e a tarde até <b>16h30</b>. A análise por hora é complementar ao pico diário.</p>`;
+ const dd=keys.map(k=>({Data:dateBR(k),Agendas:days[k].length,Pessoas:new Set(days[k].map(r=>r.nome)).size,Jeremias:days[k].filter(r=>r.origem==='Jeremias').length,Primeira:days[k].filter(r=>r.first).length,Psicologia:days[k].filter(r=>r.modal==='Psicologia').length,Psiquiatria:days[k].filter(r=>r.modal==='Psiquiatria').length,'Nomes Jeremias':days[k].filter(r=>r.origem==='Jeremias').map(r=>r.nome).join(', '),'Nomes 1ª consulta':days[k].filter(r=>r.first).map(r=>r.nome).join(', ')}));$('diaTable').innerHTML=table(dd,Object.keys(dd[0]||{Data:1})); const picker=$('dayPicker');
+ const available=keys.filter(Boolean);
+ selectedDayKey = selectedDayKey && available.includes(selectedDayKey) ? selectedDayKey : '';
+ picker.min=available[0]||''; picker.max=available[available.length-1]||'';
+ const chips=$('dayChips'); chips.innerHTML=available.map(k=>`<button type="button" class="daychip" data-day="${k}">${dateBR(k)}</button>`).join('');
+ picker.onchange=()=>{ if(available.includes(picker.value)) selectDay(picker.value,available); };
+ $('prevMonth').onclick=()=>{const b=calendarMonth||keyParts(picker.value)||{y:2026,m:1,d:1};const n=shiftMonth(b.y,b.m,-1);calendarMonth={y:n.y,m:n.m,d:1};renderCalendar(available,picker.value)};
+ $('nextMonth').onclick=()=>{const b=calendarMonth||keyParts(picker.value)||{y:2026,m:1,d:1};const n=shiftMonth(b.y,b.m,1);calendarMonth={y:n.y,m:n.m,d:1};renderCalendar(available,picker.value)};
+ chips.querySelectorAll('.daychip').forEach(b=>b.onclick=()=>selectDay(b.dataset.day,available));
+ if(available.length){selectDay(selectedDayKey&&available.includes(selectedDayKey)?selectedDayKey:available[0],available)} else {renderCalendar([],picker.value);$('dayDetail').innerHTML='<div class="card empty">Nenhuma data válida foi encontrada na planilha.</div>';}
+ let mod=[];for(const m of ['Psicologia','Psiquiatria']){mod.push(`<h3>${m}</h3>`);mod.push(table(keys.map(k=>{let a=days[k].filter(r=>r.modal===m);return {Data:dateBR(k),Quantidade:a.length,Pessoas:a.map(r=>r.nome).join(', '),'Jeremias':a.filter(r=>r.origem==='Jeremias').map(r=>r.nome).join(', '),'Primeira vez':a.filter(r=>r.first).map(r=>r.nome).join(', ')}}),['Data','Quantidade','Pessoas','Jeremias','Primeira vez']))}$('modalTable').innerHTML=mod.join('');
+ let hours={};rows.forEach(r=>{let h=Number.isFinite(r.min)?String(Math.floor(r.min/60)).padStart(2,'0')+':'+String(r.min%60).padStart(2,'0'):'Sem horário';(hours[h]??=[]).push(r)});let hd=Object.keys(hours).sort().map(h=>({Hora:h,Quantidade:hours[h].length,Psicologia:hours[h].filter(r=>r.modal==='Psicologia').length,Psiquiatria:hours[h].filter(r=>r.modal==='Psiquiatria').length}));$('horaTable').innerHTML=table(hd,['Hora','Quantidade','Psicologia','Psiquiatria']);
+ let pm={};rows.forEach(r=>{let k=r.prof+'|'+r.modal;(pm[k]??=[]).push(r)});let pd=Object.entries(pm).map(([k,a])=>{let [prof,modal]=k.split('|');return {Profissional:prof,Modalidade:modal,Agendas:a.length,Pessoas:new Set(a.map(r=>r.nome)).size,'Dias ativos':new Set(a.map(r=>r.dataKey)).size}}).sort((a,b)=>b.Agendas-a.Agendas);$('profTable').innerHTML=table(pd,['Profissional','Modalidade','Agendas','Pessoas','Dias ativos']);
+ let rp=Object.entries(groupBy(rows,'nome')).filter(([,a])=>a.length>1).map(([nome,a])=>({Nome:nome,Ocorrencias:a.length,Datas:a.map(r=>dateBR(r.dataKey)).filter((v,i,x)=>x.indexOf(v)===i).join(', '),Modalidades:[...new Set(a.map(r=>r.modal))].join(', ')})).sort((a,b)=>b.Ocorrencias-a.Ocorrencias);$('repTable').innerHTML=table(rp,['Nome','Ocorrencias','Datas','Modalidades']);
+ let og=Object.entries(groupBy(rows,'origem')).map(([origem,a])=>({Origem:origem,Quantidade:a.length,Pessoas:new Set(a.map(r=>r.nome)).size}));$('origemTable').innerHTML=table(og,['Origem','Quantidade','Pessoas']);
+ const cap=[['30 min',rows.length*.5],['45 min',rows.length*.75],['60 min',rows.length],['90 min',rows.length*1.5]].map(x=>({'Duração média':x[0],'Horas teóricas':x[1].toFixed(1)}));$('capTable').innerHTML=table(cap,['Duração média','Horas teóricas']);
+ const hist=keys.map(k=>{const a=days[k]||[];const confirmed=a.filter(r=>attendance[r.id]==='compareceu').length;const missed=a.filter(r=>attendance[r.id]==='nao_compareceu').length;const pending=a.length-confirmed-missed;return {Data:dateBR(k),Pessoas:new Set(a.map(r=>r.nome)).size,Agendas:a.length,Confirmados:confirmed,Faltas:missed,'Não informado':pending}});$('historicoTable').innerHTML=table(hist,['Data','Pessoas','Agendas','Confirmados','Faltas','Não informado']); const htot=hist.reduce((acc,r)=>{acc.p+=r.Pessoas;acc.a+=r.Agendas;acc.c+=r.Confirmados;acc.f+=r.Faltas;acc.n+=r['Não informado'];return acc},{p:0,a:0,c:0,f:0,n:0}); $('historicoSummary').innerHTML=[['Agendas',htot.a],['Confirmados',htot.c],['Faltas',htot.f],['Não informado',htot.n]].map(x=>`<div class="summary-chip"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+}
+let deferred;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;$('install').style.display='inline-block'});$('install').onclick=async()=>{if(deferred){deferred.prompt();deferred=null;$('install').style.display='none'}};
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body></html>
